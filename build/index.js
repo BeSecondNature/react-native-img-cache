@@ -20,7 +20,10 @@ export class ImageCache {
     getPath(uri, immutable) {
         let path = uri.substring(uri.lastIndexOf("/"));
         path = path.indexOf("?") === -1 ? path : path.substring(path.lastIndexOf("."), path.indexOf("?"));
-        const ext = path.indexOf(".") === -1 ? ".jpg" : path.substring(path.indexOf("."));
+        let ext = path.indexOf(".") === -1 ? ".jpg" : path.substring(path.indexOf("."));
+        if(['.jpg','.gif','.jpeg','.png'].indexOf(ext.toLowerCase()) == -1) { // ensure it's a valid extension 
+            ext = '.jpg'
+       }
         if (immutable === true) {
             return BASE_DIR + "/" + SHA1(uri) + ext;
         }
@@ -98,7 +101,7 @@ export class ImageCache {
     }
     get(uri) {
         const cache = this.cache[uri];
-        if (cache.path) {
+        if (cache.path && cache.downloading == false) {
             // We check here if IOS didn't delete the cache content
             RNFetchBlob.fs.exists(cache.path).then((exists) => {
                 if (exists) {
